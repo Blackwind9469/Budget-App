@@ -1,11 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { deleteCategory } from "@/lib/categories";
 
 // Kategori silme endpoint'i
+export const dynamic = 'force-dynamic'; // Zorunlu olarak dinamik route olarak işaretliyoruz
+
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -30,20 +32,11 @@ export async function DELETE(
       });
     }
 
-    // İstek gövdesini al (userId'yi içeriyor)
-    const body = await request.json();
-    const { userId } = body;
-
-    // Kullanıcı yalnızca kendi kategorilerini silebilmeli
-    if (userId !== session.user.id) {
-      return new NextResponse(JSON.stringify({ error: "Yetkisiz erişim" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    // Kullanıcı ID'sini oturumdan al
+    const userId = session.user.id;
 
     // Kategoriyi sil
-    await deleteCategory(id, userId);
+    await deleteCategory(id);
 
     return new NextResponse(JSON.stringify({ success: true }), {
       status: 200,

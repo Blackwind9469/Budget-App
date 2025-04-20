@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GalleryVerticalEnd } from "lucide-react";
 import { z } from "zod";
@@ -40,12 +40,31 @@ const formSchema = z
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Token bileşeni, useSearchParams'ı Suspense içinde kullanmak için
+function TokenHandler({
+  onTokenFound,
+}: {
+  onTokenFound: (token: string) => void;
+}) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const tokenParam = searchParams.get("token");
+    if (tokenParam) {
+      onTokenFound(tokenParam);
+    } else {
+      toast.error("Geçersiz veya eksik şifre sıfırlama bağlantısı");
+    }
+  }, [searchParams, onTokenFound]);
+
+  return null;
+}
+
 export default function ResetPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -55,15 +74,9 @@ export default function ResetPasswordPage() {
     },
   });
 
-  useEffect(() => {
-    const tokenParam = searchParams.get("token");
-    if (!tokenParam) {
-      toast.error("Geçersiz veya eksik şifre sıfırlama bağlantısı");
-      router.push("/forgot-password");
-      return;
-    }
-    setToken(tokenParam);
-  }, [searchParams, router]);
+  const handleTokenFound = (tokenValue: string) => {
+    setToken(tokenValue);
+  };
 
   async function onSubmit(values: FormValues) {
     if (!token) {
@@ -103,6 +116,10 @@ export default function ResetPasswordPage() {
 
   return (
     <div className='flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10'>
+      <Suspense fallback={null}>
+        <TokenHandler onTokenFound={handleTokenFound} />
+      </Suspense>
+
       <div className='flex w-full max-w-md flex-col gap-6'>
         <a href='/' className='flex items-center gap-2 self-center font-medium'>
           <div className='flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground'>

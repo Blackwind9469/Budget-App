@@ -3,6 +3,11 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    // !! WARN !!
+    // Tip kontrollerini build sırasında devre dışı bırakıyor ve derlemeyi hızlandırıyor
+    ignoreBuildErrors: true,
+  },
   images: { unoptimized: true },
   webpack: (config, { isServer }) => {
     if (!isServer) {

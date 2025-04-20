@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getCategories, createCategory, TransactionType } from "@/lib/categories";
 
-// GET /api/categories - Kullanıcının kategorilerini getir
-export async function GET(request: Request) {
+// GET /api/categories - Tüm kategorileri getir
+export async function GET(request: NextRequest) {
   try {
     // Kullanıcı oturumunu kontrol et
     const session = await getServerSession(authOptions);
@@ -15,20 +15,8 @@ export async function GET(request: Request) {
       });
     }
 
-    // URL'den userId parametresini al
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId") || session.user.id;
-
-    // Kullanıcı yalnızca kendi kategorilerini görebilmeli
-    if (userId !== session.user.id) {
-      return new NextResponse(JSON.stringify({ error: "Yetkisiz erişim" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
     // Kategorileri getir
-    const categories = await getCategories(userId);
+    const categories = await getCategories();
 
     return NextResponse.json(categories);
   } catch (error: any) {
@@ -44,7 +32,7 @@ export async function GET(request: Request) {
 }
 
 // POST /api/categories - Yeni kategori oluştur
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     // Kullanıcı oturumunu kontrol et
     const session = await getServerSession(authOptions);
@@ -57,25 +45,17 @@ export async function POST(request: Request) {
 
     // İstek gövdesini al
     const body = await request.json();
-    const { name, type, icon, userId } = body;
+    const { name, type, icon } = body;
 
     // Gerekli alanları kontrol et
-    if (!name || !type || !userId) {
+    if (!name || !type) {
       return new NextResponse(
-        JSON.stringify({ error: "Eksik alanlar: İsim, tür ve kullanıcı ID gerekli" }),
+        JSON.stringify({ error: "Eksik alanlar: İsim ve tür gerekli" }),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
         }
       );
-    }
-
-    // Kullanıcı yalnızca kendi adına kategori oluşturabilmeli
-    if (userId !== session.user.id) {
-      return new NextResponse(JSON.stringify({ error: "Yetkisiz erişim" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json" },
-      });
     }
 
     // Kategori türünü kontrol et
@@ -93,8 +73,7 @@ export async function POST(request: Request) {
     const newCategory = await createCategory({
       name,
       type,
-      icon,
-      userId,
+      icon
     });
 
     return new NextResponse(JSON.stringify(newCategory), {

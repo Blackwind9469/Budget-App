@@ -1,12 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getTransactions, updateTransaction, deleteTransaction } from "@/lib/transactions";
 import { TransactionType } from "@/lib/categories";
 
+export const dynamic = 'force-dynamic'; // Zorunlu olarak dinamik route olarak işaretliyoruz
+
 // GET /api/transactions/[id] - Belirli bir işlemi getir
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -71,7 +73,7 @@ export async function GET(
 
 // PUT /api/transactions/[id] - Belirli bir işlemi güncelle
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -175,7 +177,7 @@ export async function PUT(
 
 // DELETE /api/transactions/[id] - Belirli bir işlemi sil
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

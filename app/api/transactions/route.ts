@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { 
@@ -10,7 +10,7 @@ import {
 import { TransactionType } from "@/lib/categories";
 
 // GET /api/transactions - Kullanıcının işlemlerini getir
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     // Kullanıcı oturumunu kontrol et
     const session = await getServerSession(authOptions);
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     }
 
     // URL'den parametreleri al
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const userId = searchParams.get("userId") || session.user.id;
     
     // Kullanıcı yalnızca kendi işlemlerini görebilmeli
@@ -72,7 +72,7 @@ export async function GET(request: Request) {
 }
 
 // POST /api/transactions - Yeni işlem oluştur
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     // Kullanıcı oturumunu kontrol et
     const session = await getServerSession(authOptions);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Loader2,
@@ -16,16 +16,36 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+// Params bileşeni, useSearchParams'ı Suspense içinde kullanmak için
+function EmailVerificationParams({
+  onParamsLoaded,
+}: {
+  onParamsLoaded: (token: string | null, email: string | null) => void;
+}) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    const email = searchParams.get("email");
+    onParamsLoaded(token, email);
+  }, [searchParams, onParamsLoaded]);
+
+  return null;
+}
+
 export default function VerifyEmailPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-  const email = searchParams.get("email");
-
+  const [token, setToken] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
   const [message, setMessage] = useState<string>("");
+
+  const handleParamsLoaded = (token: string | null, email: string | null) => {
+    setToken(token);
+    setEmail(email);
+  };
 
   useEffect(() => {
     // Token varsa doğrulamayı yap
@@ -57,6 +77,10 @@ export default function VerifyEmailPage() {
 
   return (
     <div className='flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10'>
+      <Suspense fallback={null}>
+        <EmailVerificationParams onParamsLoaded={handleParamsLoaded} />
+      </Suspense>
+
       <div className='flex w-full max-w-md flex-col gap-6'>
         <a href='/' className='flex items-center gap-2 self-center font-medium'>
           <div className='flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground'>
