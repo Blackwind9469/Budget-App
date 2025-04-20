@@ -5,6 +5,7 @@ import AppleProvider from "next-auth/providers/apple"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { verifyPassword } from "./password"
 import { query } from "./db"
+import { NextAuthOptions } from "next-auth"
 
 // Next-Auth kullanıcı tipi için rol bilgisini ekliyoruz
 declare module "next-auth" {
@@ -35,19 +36,19 @@ declare module "next-auth/jwt" {
   }
 }
 
-export const authOptions: AuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     GithubProvider({
-      clientId: process.env.GITHUB_ID as string,
-      clientSecret: process.env.GITHUB_SECRET as string,
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     }),
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     AppleProvider({
-      clientId: process.env.APPLE_ID as string,
-      clientSecret: process.env.APPLE_SECRET as string,
+      clientId: process.env.APPLE_ID!,
+      clientSecret: process.env.APPLE_SECRET!,
     }),
     CredentialsProvider({
       name: 'E-posta ve Şifre',
@@ -100,25 +101,45 @@ export const authOptions: AuthOptions = {
       }
     }),
   ],
+  pages: {
+    signIn: "/sign-in",
+    error: "/error",
+  },
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user?.id) {
-        token.id = user.id;
+    async session({ token, session }) {
+      if (token) {
+        session.user.id = token.id;
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.image = token.picture;
       }
-      if (user?.role) {
-        token.role = user.role;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session?.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role || 'user';
-      }
+
       return session;
+    },
+    async jwt({ token, user }) {
+      const dbUser = await query(
+        'SELECT * FROM users WHERE email = $1',
+        [token.email ?? ""]
+      );
+
+      if (!dbUser.rows.length) {
+        if (user) {
+          token.id = user.id;
+        }
+        return token;
+      }
+
+      const userData = dbUser.rows[0];
+
+      return {
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        picture: userData.image,
+      };
     },
     // OAuth ile giriş yapan kullanıcılar için signup callback ekleniyor
     async signIn({ user, account }) {
@@ -174,10 +195,15 @@ export const authOptions: AuthOptions = {
       return true;
     }
   },
-  pages: {
-    signIn: '/sign-in',
-    error: '/auth-error',
-    verifyRequest: '/verify-email',
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
   },
-  debug: process.env.NODE_ENV === 'development',
 }

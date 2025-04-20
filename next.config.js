@@ -25,6 +25,29 @@ const nextConfig = {
     }
     return config;
   },
+  // Auth yönlendirme için domain ayarları
+  async rewrites() {
+    return [
+      {
+        source: '/api/auth/:path*',
+        destination: '/api/auth/:path*',
+      },
+    ];
+  },
+  // Auth callback için güvenilir domainler
+  async headers() {
+    return [
+      {
+        source: '/api/auth/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
+          { key: 'Access-Control-Allow-Origin', value: '*' }, // Bu alanı '*' yerine gerçek domaininize göre ayarlayabilirsiniz 
+          { key: 'Access-Control-Allow-Methods', value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT' },
+          { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' },
+        ],
+      }
+    ];
+  }
 };
 
 module.exports = nextConfig;
