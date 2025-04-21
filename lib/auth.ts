@@ -196,15 +196,25 @@ export const authOptions: NextAuthOptions = {
     },
     // Yönlendirme için callback
     async redirect({ url, baseUrl }) {
-      // Giriş yapıldıktan sonra dashboard'a yönlendir
-      if (url.startsWith(baseUrl)) {
+      console.log('Redirect callback triggered:', { url, baseUrl });
+      
+      // Eğer URL başlangıcı baseUrl ise veya kök yolu işaret ediyorsa dashboard'a yönlendir
+      if (url.startsWith(baseUrl) || url === '/api/auth/signin' || url === '/sign-in') {
         return `${baseUrl}/dashboard`;
       }
-      // OAuth geri dönüşleri için baseUrl'ye izin ver
-      if (url.startsWith("/")) {
+      
+      // Eğer url "/" ile başlıyorsa, tam URL oluştur
+      if (url.startsWith('/')) {
         return `${baseUrl}${url}`;
       }
-      return baseUrl;
+      
+      // Güvenli olmayan URL'leri engelle
+      if (!url.startsWith(baseUrl)) {
+        return baseUrl;
+      }
+      
+      // Diğer tüm durumlar için URL'yi olduğu gibi döndür
+      return url;
     }
   },
   cookies: {

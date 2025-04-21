@@ -34,9 +34,13 @@ export function LoginForm({
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false,
+        redirect: true,
+        callbackUrl: "/dashboard",
       });
 
+      // redirect: true olduğu için aşağıdaki kod çalışmayacak
+      // ancak redirect: false yaparsanız bu kodları kullanabilirsiniz
+      /*
       if (result?.error) {
         if (
           result.error.includes("E-posta adresinizi doğrulamanız gerekiyor")
@@ -61,9 +65,9 @@ export function LoginForm({
         toast.success("Giriş başarılı! Yönlendiriliyorsunuz...");
         router.push("/dashboard");
       }
+      */
     } catch (error) {
       toast.error("Bir hata oluştu. Lütfen tekrar deneyin.");
-    } finally {
       setLoading(false);
     }
   };
@@ -82,7 +86,7 @@ export function LoginForm({
                 <Button
                   type='button'
                   className='inline-flex items-center justify-center gap-2 h-9 rounded-md px-3 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700'
-                  onClick={() => signIn("apple", { callbackUrl: "/dashboard" })}
+                  onClick={() => signIn("apple")}
                 >
                   <FaApple className='h-4 w-4' />
                   Apple ile Giriş Yap
@@ -90,9 +94,7 @@ export function LoginForm({
                 <Button
                   type='button'
                   className='inline-flex items-center justify-center gap-2 h-9 rounded-md px-3 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700'
-                  onClick={() =>
-                    signIn("google", { callbackUrl: "/dashboard" })
-                  }
+                  onClick={() => signIn("google")}
                 >
                   <FaGoogle className='h-4 w-4' />
                   Google ile Giriş Yap
@@ -100,9 +102,7 @@ export function LoginForm({
                 <Button
                   type='button'
                   className='inline-flex items-center justify-center gap-2 h-9 rounded-md px-3 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700'
-                  onClick={() =>
-                    signIn("github", { callbackUrl: "/dashboard" })
-                  }
+                  onClick={() => signIn("github")}
                 >
                   <FaGithub className='h-4 w-4' />
                   GitHub ile Giriş Yap
