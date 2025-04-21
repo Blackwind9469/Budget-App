@@ -198,23 +198,8 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       console.log('Redirect callback triggered:', { url, baseUrl });
       
-      // Eğer URL başlangıcı baseUrl ise veya kök yolu işaret ediyorsa dashboard'a yönlendir
-      if (url.startsWith(baseUrl) || url === '/api/auth/signin' || url === '/sign-in') {
-        return `${baseUrl}/dashboard`;
-      }
-      
-      // Eğer url "/" ile başlıyorsa, tam URL oluştur
-      if (url.startsWith('/')) {
-        return `${baseUrl}${url}`;
-      }
-      
-      // Güvenli olmayan URL'leri engelle
-      if (!url.startsWith(baseUrl)) {
-        return baseUrl;
-      }
-      
-      // Diğer tüm durumlar için URL'yi olduğu gibi döndür
-      return url;
+      // Her durumda dashboard'a yönlendir (basit çözüm)
+      return `${baseUrl}/dashboard`;
     }
   },
   cookies: {
