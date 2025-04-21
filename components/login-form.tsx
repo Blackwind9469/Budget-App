@@ -86,7 +86,10 @@ export function LoginForm({
                 <Button
                   type='button'
                   className='inline-flex items-center justify-center gap-2 h-9 rounded-md px-3 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700'
-                  onClick={() => signIn("apple")}
+                  onClick={() =>
+                    (window.location.href =
+                      "/api/auth/signin/apple?callbackUrl=%2Fdashboard")
+                  }
                 >
                   <FaApple className='h-4 w-4' />
                   Apple ile Giriş Yap
@@ -94,7 +97,10 @@ export function LoginForm({
                 <Button
                   type='button'
                   className='inline-flex items-center justify-center gap-2 h-9 rounded-md px-3 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700'
-                  onClick={() => signIn("google")}
+                  onClick={() =>
+                    (window.location.href =
+                      "/api/auth/signin/google?callbackUrl=%2Fdashboard")
+                  }
                 >
                   <FaGoogle className='h-4 w-4' />
                   Google ile Giriş Yap
@@ -102,7 +108,10 @@ export function LoginForm({
                 <Button
                   type='button'
                   className='inline-flex items-center justify-center gap-2 h-9 rounded-md px-3 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700'
-                  onClick={() => signIn("github")}
+                  onClick={() =>
+                    (window.location.href =
+                      "/api/auth/signin/github?callbackUrl=%2Fdashboard")
+                  }
                 >
                   <FaGithub className='h-4 w-4' />
                   GitHub ile Giriş Yap

@@ -111,10 +111,14 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async session({ token, session }) {
       if (token) {
+        console.log("Session callback - token mevcut");
         session.user.id = token.id;
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.image = token.picture;
+        session.user.role = token.role;
+      } else {
+        console.log("Session callback - token yok");
       }
 
       return session;
