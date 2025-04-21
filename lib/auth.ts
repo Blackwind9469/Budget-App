@@ -193,6 +193,18 @@ export const authOptions: NextAuthOptions = {
       }
       
       return true;
+    },
+    // Yönlendirme için callback
+    async redirect({ url, baseUrl }) {
+      // Giriş yapıldıktan sonra dashboard'a yönlendir
+      if (url.startsWith(baseUrl)) {
+        return `${baseUrl}/dashboard`;
+      }
+      // OAuth geri dönüşleri için baseUrl'ye izin ver
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      return baseUrl;
     }
   },
   cookies: {
@@ -205,5 +217,5 @@ export const authOptions: NextAuthOptions = {
         secure: process.env.NODE_ENV === "production",
       },
     },
-  },
+  }
 }
